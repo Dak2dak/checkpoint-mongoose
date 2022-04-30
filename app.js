@@ -1,15 +1,28 @@
 //============= REFERENCING MONGOOSE ==============
-const mongoose = require('mongoose') 
-const nodemon = require('nodemon')
+const mongoose = require('mongoose'); 
+const nodemon = require('nodemon');
+const Schema = mongoose.Schema;
 
 //========== CONNECTING TO THE DATABASE ===========
-mongoose.connect(`mongodb://localhost:27017`, { 
-    useNewUrlParser: true, 
-    useUnifiedTopology: true 
-})
+let db;
+async function dbConnect() {
+    console.log(">>mongo");
+    const url = "mongodb://127.0.0.1:27017/contact2";
+    mongoose.connect(url, { useNewUrlParser: true});
+    db = mongoose.connection;
+    db.once("open", (_) => {
+        console.log("Database connected:", url)
+    });
+
+    db.on("error", (err) => {
+        console.log("connection error:", err);
+    })
+}
+
+dbConnect();
 
 //========= DEFINING A PERSON SCHEMA  =============
-let personSchema = new mongoose.Schema({
+let personSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -20,10 +33,11 @@ let personSchema = new mongoose.Schema({
 })
 
 //========== CREATING A PERSON MODEL ==============
-let Person = mongoose.model('Person', personSchema)
+let Person = mongoose.model('Person', personSchema, "list2")
+// mongoose.model('model', schema, collection)
 
 // CREATING AND SAVING A RECORD OF THE PREVIOUS MODEL
-const createAndSaveRecord = (done) => {
+async function createAndSaveRecord () {
     let mike = new Person({
         name: 'Mike Bamenga', 
         age: 27,
@@ -31,9 +45,10 @@ const createAndSaveRecord = (done) => {
         hometown: 'Abidjan'
     })
 
-    mike.save((err, personToSave) => {
-        err ? console.log(err) : done(null, personToSave)
-    })
+    // mike.save((err, personToSave) => {
+    //     err ? console.log(err) : done(null, personToSave)
+    // })
+    await mike.save();
 }
 
 //=== CREATING MANY RECORDS WITH model.create() ====
@@ -72,6 +87,7 @@ let createManyPeople = (arrayOfPeople, done) => {
             done(null, createdPeople)
         }
     })
+    console.log(createdPeople)
 }
 
 //USING model.find() TO SEARCH THROUGH THE DATABASE
@@ -79,6 +95,7 @@ let findAllThePeopleByAGivenName = (name, done) => {
     Person.find({name: name}, (err, peopleFound) => {
         err ? console.log(err) : done(null, peopleFound)
     })
+    console.log(createdPeople)
 }
 
 // USING model.findOne() TO RETURN A SINGLE MATCHING DOCUMENT FROM THE DATABASE
