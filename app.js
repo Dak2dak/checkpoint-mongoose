@@ -13,16 +13,15 @@ async function dbConnect() {
     db.once("open", (_) => {
         console.log("Database connected:", url)
     });
-
     db.on("error", (err) => {
         console.log("connection error:", err);
-    })
+    });
 }
 
 dbConnect();
 
 //========= DEFINING A PERSON SCHEMA  =============
-let personSchema = new Schema({
+const personSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -30,14 +29,15 @@ let personSchema = new Schema({
     age: Number,
     favoriteFoods: [String],
     hometown: String 
-})
+});
 
 //========== CREATING A PERSON MODEL ==============
-let Person = mongoose.model('Person', personSchema, "list2")
+const Person = mongoose.model('Person', personSchema, "list2");
 // mongoose.model('model', schema, collection)
 
+
 // CREATING AND SAVING A RECORD OF THE PREVIOUS MODEL
-async function createAndSaveRecord () {
+const createAndSaveRecord = (done) => {
     let mike = new Person({
         name: 'Mike Bamenga', 
         age: 27,
@@ -45,10 +45,9 @@ async function createAndSaveRecord () {
         hometown: 'Abidjan'
     })
 
-    // mike.save((err, personToSave) => {
-    //     err ? console.log(err) : done(null, personToSave)
-    // })
-    await mike.save();
+    mike.save((err, personToSave) => {
+        err ? console.log(err) : done(null, personToSave)
+    })
 }
 
 //=== CREATING MANY RECORDS WITH model.create() ====
@@ -101,7 +100,7 @@ let findAllThePeopleByAGivenName = (name, done) => {
 // USING model.findOne() TO RETURN A SINGLE MATCHING DOCUMENT FROM THE DATABASE
 let findOnePersonByHisFood = (food, done) => {
     Person.findOne({favoriteFoods: food}, (err, personFound) => {
-        if(err) return console.log(err)
+        if(err) console.log(err)
         done(null, personFound)
     })
 }
@@ -123,7 +122,7 @@ let classicUpdate = (personId, done) => {
         if(err) return console.log(err)
         person.favoriteFoods.push("hamburger")
         person.save((err, data) => {
-            if(err) return console.log(err)
+            if(err) console.log(err)
             done(null, data) 
         })
     })
@@ -133,7 +132,7 @@ let classicUpdate = (personId, done) => {
 let findPersonAndUpdateThem = (personName, done) => {
     Person.findOneAndUpdate({name: personName}, {age: 20}, {new: true}, 
         (err, updatedPerson) => {
-            if(err) return console.log(err)
+            if(err) console.log(err)
             done(null, updatedPerson)
         })
 }
@@ -141,7 +140,7 @@ let findPersonAndUpdateThem = (personName, done) => {
 // DELETING ONE DOCUMENT USING model.findByIdAndRemove 
 let deleteSomeoneById = (personId, done) => {
     Person.findOneAndRemove({id: personId}, (err, deletedPerson) => {
-        if(err) return console.log(err)
+        if(err) console.log(err)
         done(null, deletedPerson)
     })
 }
