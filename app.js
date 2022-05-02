@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 let db;
 async function dbConnect() {
     console.log(">>mongo");
-    const url = "mongodb://127.0.0.1:27017/contact2";
+    const url = "mongodb://127.0.0.1:27017/dbCheckpoint";
     mongoose.connect(url, { useNewUrlParser: true});
     db = mongoose.connection;
     db.once("open", (_) => {
@@ -32,135 +32,169 @@ const personSchema = new Schema({
 });
 
 //========== CREATING A PERSON MODEL ==============
-const Person = mongoose.model('Person', personSchema, "list2");
+const Person = mongoose.model('Person', personSchema, "dbCollection");
 // mongoose.model('model', schema, collection)
 
 
 // CREATING AND SAVING A RECORD OF THE PREVIOUS MODEL
-const createAndSaveRecord = (done) => {
-    let mike = new Person({
-        name: 'Mike Bamenga', 
+
+const mike = new Person({
+        name: 'Mike', 
         age: 27,
         favoriteFoods: ["Pistache", "Alloco", "Pizza"],
         hometown: 'Abidjan'
     })
 
-    mike.save((err, personToSave) => {
-        err ? console.log(err) : done(null, personToSave)
+const createAndSaveRecord = (person) => {
+    person.save((err) => {
+        if (err) return console.log(err)
     })
 }
 
-//=== CREATING MANY RECORDS WITH model.create() ====
+createAndSaveRecord(mike);
+
+
+// === CREATING MANY RECORDS WITH model.create() =====
 let arrayOfPeople = [
     {
-        name: 'Jack Kamani', 
+        name: 'Jack', 
         age: 25,
-        favoriteFoods: ["Pistache", "Pizza"],
+        favoriteFoods: ['Pistache', 'Pizza'],
         hometown: 'Abidjan'
     },
     {
-        name: 'Will Okafor', 
+        name: 'William', 
         age: 37,
-        favoriteFoods: ["Ogbono Soup", "Jollof Rice", "Pizza"],
+        favoriteFoods: ['Ogbono Soup', 'Jollof Rice', 'Pizza'],
         hometown: 'Abuja'
     },
     {
-        name: 'Didier Koffi', 
+        name: 'Didier', 
         age: 30,
         favoriteFoods: ["N'gbô", "foutou", "Puff-Puff"],
         hometown: 'Bouaké'
     },
     {
-        name: 'Matt Yamattoho', 
+        name: 'Matt', 
         age: 22,
-        favoriteFoods: ["Burrito", "Sushi", "pizza"],
+        favoriteFoods: ['Burrito', 'Sushi', 'pizza'],
+        hometown: 'Tokyo'
+    },
+    {
+        name: 'Mary', 
+        age: 41,
+        favoriteFoods: ['yuca', 'Sushi', 'dolo'],
+        hometown: 'Bamako'
+    },
+    {
+        name: 'Marco', 
+        age: 15,
+        favoriteFoods: ['Sushi'],
         hometown: 'Tokyo'
     }
-]
+];
 
-let createManyPeople = (arrayOfPeople, done) => {
-    Person.create(arrayOfPeople, (err, createdPeople) => {
-        if(err) {
-            console.log(err)
-        }else {
-            done(null, createdPeople)
-        }
+const createManyPeople = (arrayOfPeople) => {
+    Person.create(arrayOfPeople, (err) => {
+        if(err) return console.log(err)
     })
-    console.log(createdPeople)
 }
+
+createManyPeople(arrayOfPeople);
+
 
 //USING model.find() TO SEARCH THROUGH THE DATABASE
-let findAllThePeopleByAGivenName = (name, done) => {
-    Person.find({name: name}, (err, peopleFound) => {
-        err ? console.log(err) : done(null, peopleFound)
+let searchedName = "Didier";
+const findPeopleByAGivenName = (searchedName) => {
+    Person.find({name: searchedName}, (err, peopleFound) => {
+        if(err) return console.log(err)
+        console.log(peopleFound)
     })
-    console.log(createdPeople)
 }
+
+findPeopleByAGivenName(searchedName);
+
 
 // USING model.findOne() TO RETURN A SINGLE MATCHING DOCUMENT FROM THE DATABASE
-let findOnePersonByHisFood = (food, done) => {
+let food = "Sushi";
+const findOneByFood = (food) => {
     Person.findOne({favoriteFoods: food}, (err, personFound) => {
         if(err) console.log(err)
-        done(null, personFound)
+        console.log(personFound)
     })
 }
 
-// USING model.findById() TO SEARCH THROUGH THE DATABASE BY _ID
-let findPersonById = (personId, done) => {
-    Person.findById(personId, (err, result) => {
-        if(err) {
-            console.log(err)
-        }else {
-            done(null, result)
-        }
+findOneByFood(food);
+
+
+// // USING model.findById() TO SEARCH THROUGH THE DATABASE BY _ID
+let personId1 = '626ef1799f3fee746695b2db';
+const findPersonById = (personId1) => {
+    Person.findById(personId1, (err, result) => {
+        if(err) return console.log(err)
+        console.log(result)
     })
 }
 
-// PERFORMING CLASSIC UPDATES BY RUNNING Find, Edit, THEN Sav
-let classicUpdate = (personId, done) => {
+findPersonById(personId1);
+
+
+// // PERFORMING CLASSIC UPDATES BY RUNNING Find, Edit, THEN Sav
+let personId = "626ef1799f3fee746695b2d9";
+let classicUpdate = (personId) => {
     Person.findById(personId, (err, person) => {
         if(err) return console.log(err)
         person.favoriteFoods.push("hamburger")
-        person.save((err, data) => {
+        person.save((err) => {
             if(err) console.log(err)
-            done(null, data) 
         })
     })
 }
 
-// PERFORMING NEW UPDATES ON A DOCUMENT USING model.findOneAndUpdate()
-let findPersonAndUpdateThem = (personName, done) => {
+classicUpdate(personId);
+
+// // PERFORMING NEW UPDATES ON A DOCUMENT USING model.findOneAndUpdate()
+let personName = "William";
+const findPersonAndUpdateThem = (personName) => {
     Person.findOneAndUpdate({name: personName}, {age: 20}, {new: true}, 
         (err, updatedPerson) => {
             if(err) console.log(err)
-            done(null, updatedPerson)
+            console.log(updatedPerson)
         })
 }
 
+findPersonAndUpdateThem(personName);
+
 // DELETING ONE DOCUMENT USING model.findByIdAndRemove 
-let deleteSomeoneById = (personId, done) => {
-    Person.findOneAndRemove({id: personId}, (err, deletedPerson) => {
+let personId2 = '626ef1799f3fee746695b2de';
+const deleteSomeoneById = (personId2) => {
+    Person.findOneAndRemove(personId2, (err) => {
         if(err) console.log(err)
-        done(null, deletedPerson)
     })
 }
+
+deleteSomeoneById(personId2);
 
 // DELETING MANY DOCUMENTS WITH model.remove()
-let deleteMany = (done) => {
-    const nameToRemove = "Mary"
-    Person.remove(nameToRemove, (err, removedInfo) => {
-        done(err, removedInfo)
+let targetName = "Mary";
+const deleteManyDoc = (targetName) => {
+    Person.deleteMany({name: targetName}, (err) => {
+        if(err) return console.log(err)
     })
 }
 
+deleteManyDoc(targetName);
+
 // CHAINING SEARCH QUERY HELPERS TO NARROW SEARCH RESULTS
-let chainingSearchQuery = (done) => {
-    Person.find({favoriteFoods: "burrito"})
+const chainingSearchQuery = () => {
+    Person.find({favoriteFoods: "Burrito"})
         .sort({name: 'asc'})
         .limit(2)
         .select('-age')
         .exec((err, results) => {
+            if(err) return console.log(err)
             console.log(results)
-            done(err, results)
         })
 }
+
+chainingSearchQuery();
